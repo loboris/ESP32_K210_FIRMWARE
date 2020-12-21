@@ -1,0 +1,71 @@
+menu "ESP<->K210 configuration"
+
+    config K210_POWER_ON_PIN
+        int "K210 Power enable pin"
+        default 4
+        range -1 40
+        help
+            Pin used to power on K210.
+            Set to -1 if not used.
+
+    config USE_ADC
+        bool "Enable ADC module"
+        default "y"
+        help
+            Enables/disable using ESP32 ADC for voltage measurement
+
+    config USE_KEYPAD
+        bool "Enable Keypad module"
+        default "y"
+        help
+            Enables/disable using ESP32 to handle the keypad
+
+    menu "SPI interface configuration"
+        config K210_SPI_MOSI_PIN
+            int "K210 SPI MOSI pin"
+            default 13
+            range 0 40
+            help
+                Pin used as SPI MISO.
+    
+        config K210_SPI_MISO_PIN
+            int "K210 SPI MISO pin"
+            default 13
+            range 0 40
+            help
+                Pin used as SPI CLK.
+                Not used in 3-line mode.
+    
+        config K210_SPI_SCLK_PIN
+            int "K210 SPI SCLK pin"
+            default 14
+            range 0 40
+            help
+                Pin used as SPI SCLK.
+    
+        config K210_SPI_CS_PIN
+            int "K210 SPI CS pin"
+            default 13
+            range 0 40
+            help
+                Pin used as SPI CS.
+    endmenu
+
+    menu "ADC configuration"
+        depends on USE_ADC
+        config ADC_PIN_1
+            int "ADC Pin 1"
+            default 35
+            range 0 40
+            help
+                Pin used ADC 1.
+    
+        config ADC_PIN_22
+            int "ADC Pin 1"
+            default 34
+            range 0 40
+            help
+                Pin used ADC 2.
+    endmenu
+
+endmenu

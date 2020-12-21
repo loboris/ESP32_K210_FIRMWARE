@@ -1,0 +1,137 @@
+<table class="fixed" border="0">
+    <col width="900px" /><col width="600px" />
+    <tr><td>
+        <p><font face="verdana" color="brown"><h3>MKM-2018 upravitelj datoteka</h3></font></p>
+    </td><td>
+        <table border="0">
+            <tr>
+                <td>
+                    <label for="newfile">Pošalji datoteku</label>
+                </td>
+                <td colspan="2">
+                    <input id="newfile" type="file" onchange="setpath()" style="width:100%;">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="filepath">Putanja na serveru</label>
+                </td>
+                <td>
+                    <input id="filepath" type="text" style="width:100%;">
+                </td>
+                <td>
+                    <button id="upload" type="button" onclick="upload()">Pošalji</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="dirpath">Putanja mape na serveru</label>
+                </td>
+                <td>
+                    <input id="dirpath" type="text" style="width:100%;">
+                </td>
+                <td>
+                    <button id="mkdir" type="button" onclick="newdir()">Nova mapa</button>
+                </td>
+            </tr>
+        </table>
+    </td></tr>
+</table>
+<script>
+function setpath() {
+    var host_path = window.location.pathname.split('/')[1];
+    if (host_path != '') {
+        host_path = host_path + '/';
+    }
+    var default_path = document.getElementById("newfile").files[0].name;
+    document.getElementById("filepath").value = host_path + default_path;
+}
+function upload() {
+    var filePath = document.getElementById("filepath").value;
+    var upload_path = "/upload/" + filePath;
+    var fileInput = document.getElementById("newfile").files;
+
+    /* Max size of an individual file. Make sure this
+     * value is same as that set in file_server.c */
+    var MAX_FILE_SIZE = 200*1024;
+    var MAX_FILE_SIZE_STR = "200KB";
+
+    if (fileInput.length == 0) {
+        alert("Datoteka nije izabrana!");
+    } else if (filePath.length == 0) {
+        alert("Ime datoteke na serveru nije postavljeno!");
+    } else if (filePath.indexOf(' ') >= 0) {
+        alert("Ime datoteke ne može sadržavati razmake!");
+    } else if (filePath[filePath.length-1] == '/') {
+        alert("Pogrešna putanja datoteke!");
+    } else if (fileInput[0].size > 200*1024) {
+        alert("Veličina datoteke mora biti manja od 200KB!");
+    } else {
+        document.getElementById("newfile").disabled = true;
+        document.getElementById("filepath").disabled = true;
+        document.getElementById("upload").disabled = true;
+
+        var file = fileInput[0];
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4) {
+                if (xhttp.status == 200) {
+                    document.open();
+                    document.write(xhttp.responseText);
+                    document.close();
+                } else if (xhttp.status == 0) {
+                    alert("Server zatvorio vezu!");
+                    location.reload()
+                } else {
+                    alert(xhttp.status + " Greška!\n" + xhttp.responseText);
+                    location.reload()
+                }
+            }
+        };
+        xhttp.open("POST", upload_path, true);
+        xhttp.send(file);
+    }
+}
+function newdir() {
+    var dirPath = document.getElementById("dirpath").value;
+
+    if (dirPath.length == 0) {
+        alert("Mapa nije izabrana!");
+    } else if (dirPath.indexOf(' ') >= 0) {
+        alert("Ime mape ne može sadržavati razmake!");
+    } else if (dirPath[dirPath.length-1] == '/') {
+        alert("Pogrešna putanja mape!");
+    } else {
+        var host_path = window.location.pathname.split('/')[1];
+        if (dirPath[0] == '/') {
+            host_path = '';
+        }
+        if (host_path != '') {
+            host_path = host_path + '/';
+        }
+        var newdir_path = "/newdir/" + host_path + dirPath;
+
+        document.getElementById("dirpath").disabled = true;
+        document.getElementById("mkdir").disabled = true;
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4) {
+                if (xhttp.status == 200) {
+                    document.open();
+                    document.write(xhttp.responseText);
+                    document.close();
+                } else if (xhttp.status == 0) {
+                    alert("Server zatvorio vezu!");
+                    location.reload()
+                } else {
+                    alert(xhttp.status + " Greška!\n" + xhttp.responseText);
+                    location.reload()
+                }
+            }
+        };
+        xhttp.open("POST", newdir_path, true);
+        xhttp.send();
+    }
+}
+</script>
